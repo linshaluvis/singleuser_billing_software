@@ -1992,7 +1992,7 @@ def removeUser(request,id):
     else:
         return redirect('/')
     
-    
+@login_required(login_url='login')          
 def Salesreport(request):
     if request.user:
         cmp = Company.objects.get(user = request.user.id)
@@ -2023,7 +2023,7 @@ def shareSalesReportsToEmail(request):
                 worksheet.title = 'Sales Reports'
 
                 # Write headers
-                headers = ['#', 'Date', 'Bill Number', 'Party Name', 'Amount']
+                headers = ['#', 'Date', 'Invoice Number', 'Party Name', 'Amount']
                 for col_num, header in enumerate(headers, 1):
                     worksheet.cell(row=1, column=col_num, value=header)
 
@@ -2052,7 +2052,7 @@ def shareSalesReportsToEmail(request):
             messages.error(request, 'An error occurred while sharing the sales report via email.')
 
             return redirect(Salesreport)
-        
+@login_required(login_url='login')       
 def salesreport_graph(request):
     if request.user:
         cmp = Company.objects.get(user = request.user.id)
@@ -2063,7 +2063,7 @@ def salesreport_graph(request):
         for month in range(1, 13):
             monthly_sales_data[month] = (
                 Sales.objects
-                .filter(date__month=month, date__year=current_year)
+                .filter(date__month=month, date__year=current_year,cid=cmp)
                 .aggregate(total_sales=Sum('total_amount'))['total_sales'] or 0
             )
 
@@ -2073,7 +2073,7 @@ def salesreport_graph(request):
         for year in range(2022, current_year + 1):
             yearly_sales_data[year] = (
                 Sales.objects
-                .filter(date__year=year)
+                .filter(date__year=year,cid=cmp)
                 .aggregate(total_sales=Sum('total_amount'))['total_sales'] or 0
             )
 
